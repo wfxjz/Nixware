@@ -4,13 +4,9 @@ using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 namespace ChaseMod.Utils.Memory;
 public static class MiscFunctions
 {
-    public static MemoryFunctionVoid<CCSPlayerController, CCSPlayerPawn, bool, bool> CBasePlayerController_SetPawnFunc =
-        new(
-            ChaseModUtils.IsLinux
-                ? @"\x55\x48\x89\xE5\x41\x57\x41\x56\x41\x55\x41\x54\x49\x89\xFC\x53\x48\x89\xF3\x48\x81\xEC\xC8\x00\x00\x00"
-                : @"\x44\x88\x4C\x24\x2A\x55\x57"
-        );
-
+	// string search '#SFUIHUD_InfoPanel_Coop_DeployMissionBust', xref and takefunc before if statement containing + 0xF3C in
+    // param_1 and value 1 in param_2, follow the last function called taking param_1 (just hope this offset doesn't change)
+    // TODO: I can remove probably this sig later
 	public static MemoryFunctionVoid<IntPtr> CCSMatch_UpdateTeamScores = 
         new(
             ChaseModUtils.IsLinux
