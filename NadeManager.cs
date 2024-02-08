@@ -8,6 +8,7 @@ using CounterStrikeSharp.API;
 using ChaseMod.Utils;
 using System.Drawing;
 using CounterStrikeSharp.API.Modules.Utils;
+using CounterStrikeSharp.API.Modules.Memory;
 
 namespace ChaseMod;
 internal class NadeManager
@@ -109,6 +110,9 @@ internal class NadeManager
 						pawn.MoveType = MoveType_t.MOVETYPE_OBSOLETE;
 						Utilities.SetStateChanged(pawn, "CBaseEntity", "m_MoveType");
 
+						Schema.GetRef<MoveType_t>(pawn.Handle, "CBaseEntity", "m_nActualMoveType") = MoveType_t.MOVETYPE_OBSOLETE;
+						Utilities.SetStateChanged(pawn, "CBaseEntity", "m_nActualMoveType");
+
 						pawn.HealthShotBoostExpirationTime = Server.CurrentTime + this.Plugin.Config.stunFreezeTime;
 						Utilities.SetStateChanged(pawn, "CCSPlayerPawn", "m_flHealthShotBoostExpirationTime");
 
@@ -150,6 +154,9 @@ internal class NadeManager
 
 							pawn.MoveType = MoveType_t.MOVETYPE_WALK;
 							Utilities.SetStateChanged(pawn, "CBaseEntity", "m_MoveType");
+
+							Schema.GetRef<MoveType_t>(pawn.Handle, "CBaseEntity", "m_nActualMoveType") = MoveType_t.MOVETYPE_WALK;
+							Utilities.SetStateChanged(pawn, "CBaseEntity", "m_nActualMoveType");
 
 							pawn.AbsVelocity.X = origVelocity.X;
 							pawn.AbsVelocity.Y = origVelocity.Y;
