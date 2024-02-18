@@ -111,7 +111,6 @@ internal class NadeManager
 						Utilities.SetStateChanged(pawn, "CBaseEntity", "m_MoveType");
 
 						Schema.GetRef<MoveType_t>(pawn.Handle, "CBaseEntity", "m_nActualMoveType") = MoveType_t.MOVETYPE_OBSOLETE;
-						Utilities.SetStateChanged(pawn, "CBaseEntity", "m_nActualMoveType");
 
 						pawn.HealthShotBoostExpirationTime = Server.CurrentTime + this.Plugin.Config.stunFreezeTime;
 						Utilities.SetStateChanged(pawn, "CCSPlayerPawn", "m_flHealthShotBoostExpirationTime");
