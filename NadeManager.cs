@@ -155,7 +155,6 @@ internal class NadeManager
 							Utilities.SetStateChanged(pawn, "CBaseEntity", "m_MoveType");
 
 							Schema.GetRef<MoveType_t>(pawn.Handle, "CBaseEntity", "m_nActualMoveType") = MoveType_t.MOVETYPE_WALK;
-							Utilities.SetStateChanged(pawn, "CBaseEntity", "m_nActualMoveType");
 
 							pawn.AbsVelocity.X = origVelocity.X;
 							pawn.AbsVelocity.Y = origVelocity.Y;
