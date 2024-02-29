@@ -3,7 +3,6 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Modules.Utils;
-using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
 using Microsoft.Extensions.Logging;
 using ChaseMod.Commands;
 using CounterStrikeSharp.API.Core.Logging;
@@ -13,7 +12,7 @@ namespace ChaseMod;
 [MinimumApiVersion(141)]
 public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 {
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModCS#");
+    private static new ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModCS#");
 
     public override string ModuleName => "HnS ChaseMod";
     public override string ModuleAuthor => "svn";
@@ -49,7 +48,7 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
             return HookResult.Continue;
         });
 
-        MiscCommands.AddCommands();
+        MiscCommands.AddCommands(this);
 
         nadeManager.EnableHooks();
         knifeCooldownManager.EnableHooks();
