@@ -91,8 +91,6 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
                 return HookResult.Continue;
             }
 
-            //KnifeCooldownManager.OnPlayerDisconnect(player);
-
             playerStates.Remove(player);
 
             return HookResult.Continue;
