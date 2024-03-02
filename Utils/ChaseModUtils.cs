@@ -34,30 +34,6 @@ namespace ChaseMod.Utils
             return Utilities.GetPlayers().Where(p => IsRealPlayer(p)).ToList();
         }
 
-        // these two from https://github.com/DEAFPS/SharpTimer
-        public static void PrintHtml(CCSPlayerController player, string hudContent)
-        {
-            var @event = new EventShowSurvivalRespawnStatus(false)
-            {
-                LocToken = hudContent,
-                Duration = 5,
-                Userid = player
-            };
-            @event.FireEvent(false);
-
-            @event = null;
-        }
-        public static void RemovePlayerCollision(CCSPlayerPawn pawn)
-        {
-            pawn.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
-            pawn.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEBRIS;
-            pawn.SentToClients = 0;
-            Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_Collision");
-
-            VirtualFunctionVoid<nint> collisionRulesChanged = new VirtualFunctionVoid<nint>(pawn.Handle, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 173 : 172);
-            collisionRulesChanged.Invoke(pawn.Handle);
-        }
-
         public static void ChatPrefixed(CCSPlayerController player, string message)
         {
             player.PrintToChat($" {ChatColors.Magenta}HNS {ChatColors.Grey}| {message}");
