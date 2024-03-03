@@ -25,7 +25,11 @@ public static class TriggerWorkaround
             var connection = output.Connections;
             while (connection != null)
             {
-                if (connection.TargetInput != "workaround") continue;
+                if (connection.TargetInput != "workaround")
+                {
+                    connection = connection.Next;
+                    continue;
+                }
 
                 var splitValue = connection.ValueOverride.Split(" ");
                 switch (splitValue[0])

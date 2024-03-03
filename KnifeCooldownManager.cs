@@ -11,13 +11,12 @@ internal class KnifeCooldownManager
 {
     private static ILogger Logger = CoreLogging.Factory.CreateLogger("KnifeCooldownManager");
 
-    private readonly Dictionary<CBasePlayerController, DateTime> invulnerablePlayers = new();
-
-    private ChaseMod Plugin;
+    private readonly ChaseMod _plugin;
+    private readonly Dictionary<CBasePlayerController, DateTime> _invulnerablePlayers = new();
 
     public KnifeCooldownManager(ChaseMod chaseMod)
     {
-        this.Plugin = chaseMod;
+        _plugin = chaseMod;
     }
 
     public void EnableHooks()
@@ -51,8 +50,6 @@ internal class KnifeCooldownManager
         var pawn = entity.As<CCSPlayerPawn>();
         var controller = pawn.OriginalController.Value!;
 
-        Server.PrintToConsole(controller.PlayerName + ", " + attackerController.PlayerName);
-
         if (attacker.WeaponServices == null || !attacker.WeaponServices.ActiveWeapon.IsValid)
         {
             return HookResult.Continue;
@@ -77,7 +74,7 @@ internal class KnifeCooldownManager
             return HookResult.Continue;
         }
 
-        if (invulnerablePlayers.TryGetValue(controller, out DateTime expiry))
+        if (_invulnerablePlayers.TryGetValue(controller, out DateTime expiry))
         {
             if (expiry > DateTime.Now)
             {
@@ -85,9 +82,9 @@ internal class KnifeCooldownManager
             }
         }
 
-        info.Damage = this.Plugin.Config.knifeDamage;
+        info.Damage = _plugin.Config.KnifeDamage;
         info.DamageFlags |= TakeDamageFlags_t.DFLAG_SUPPRESS_PHYSICS_FORCE;
-        invulnerablePlayers[controller] = DateTime.Now.AddSeconds(this.Plugin.Config.knifeCooldown);
+        _invulnerablePlayers[controller] = DateTime.Now.AddSeconds(_plugin.Config.KnifeCooldown);
         return HookResult.Continue;
     }
 

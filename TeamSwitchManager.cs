@@ -11,24 +11,24 @@ internal class TeamSwitchManager
 {
 	private static ILogger Logger = CoreLogging.Factory.CreateLogger("KnifeCooldownManager");
 
-	private bool switchingTeams = false;
-	private int terroristWinstreak = 0;
+	private bool _switchingTeams = false;
+	private int _terroristWinstreak = 0;
 
-	private ChaseMod Plugin;
+	private ChaseMod _plugin;
 
 	public TeamSwitchManager(ChaseMod chaseMod)
 	{
-		this.Plugin = chaseMod;
+		_plugin = chaseMod;
 	}
 
 	public void Start()
 	{
-		this.Plugin.RegisterEventHandler<EventRoundEnd>((@event, info) =>
+		_plugin.RegisterEventHandler<EventRoundEnd>((@event, info) =>
 		{
 			var winner = @event.Winner;
 			if (winner == (int)CsTeam.CounterTerrorist)
 			{
-				terroristWinstreak = 0;
+				_terroristWinstreak = 0;
 				ChaseModUtils.ChatAllPrefixed($"{ChatColors.Blue}CT {ChatColors.Grey}Win - Teams are being switched.");
 				Server.NextFrame(() =>
 				{
@@ -37,15 +37,15 @@ internal class TeamSwitchManager
 			}
 			else if (winner == (int)CsTeam.Terrorist)
 			{
-				terroristWinstreak++;
-				if (Plugin.Config.maxTerroristWinStreak > 0 && terroristWinstreak >= Plugin.Config.maxTerroristWinStreak)
+				_terroristWinstreak++;
+				if (_plugin.Config.MaxTerroristWinStreak > 0 && _terroristWinstreak >= _plugin.Config.MaxTerroristWinStreak)
 				{
-					ChaseModUtils.ChatAllPrefixed($"{ChatColors.Yellow}T {ChatColors.Grey}Win - Teams are being switched due to winstreak. ({terroristWinstreak} wins in a row)");
+					_terroristWinstreak = 0;
+					ChaseModUtils.ChatAllPrefixed($"{ChatColors.Yellow}T {ChatColors.Grey}Win - Teams are being switched due to winstreak. ({_terroristWinstreak} wins in a row)");
 					Server.NextFrame(() =>
 					{
 						SwitchTeams();
 					});
-					terroristWinstreak = 0;
 				}
 				else
 				{
@@ -55,9 +55,9 @@ internal class TeamSwitchManager
 			return HookResult.Continue;
 		});
 
-		this.Plugin.RegisterEventHandler<EventPlayerTeam>((@event, info) =>
+		_plugin.RegisterEventHandler<EventPlayerTeam>((@event, info) =>
 		{
-			if (switchingTeams)
+			if (_switchingTeams)
 			{
 				info.DontBroadcast = true;
 			}
@@ -65,17 +65,18 @@ internal class TeamSwitchManager
 			return HookResult.Continue;
 		}, HookMode.Pre);
 
-		this.Plugin.RegisterListener<Listeners.OnMapEnd>(() =>
+		_plugin.RegisterListener<Listeners.OnMapEnd>(() =>
 		{
-			this.terroristWinstreak = 0;
+			_terroristWinstreak = 0;
 		});
 	}
 
 
 	private void SwitchTeams()
 	{
-		switchingTeams = true;
-		CCSGameRules gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+		_switchingTeams = true;
+		var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
+			.First().GameRules!;
 		CCSMatch.SwapTeamScores(gameRules);
 
 		foreach (var controller in ChaseModUtils.GetAllRealPlayers())
@@ -90,7 +91,7 @@ internal class TeamSwitchManager
 				controller.SwitchTeam(CsTeam.CounterTerrorist);
 			}
 		}
-		switchingTeams = false;
+		_switchingTeams = false;
 	}
 
 

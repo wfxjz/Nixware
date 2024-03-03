@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
+using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
 using ChaseMod.Commands;
@@ -16,32 +17,24 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 
     public override string ModuleName => "HnS ChaseMod";
     public override string ModuleAuthor => "svn";
-    public override string ModuleVersion => "v1.0";
+    public override string ModuleVersion => "2.0.0";
 
-    public ChaseModConfig Config { get; set; }
+    public ChaseModConfig Config { get; set; } = new();
     public void OnConfigParsed(ChaseModConfig config) { Config = config; }
 
-
-    public readonly Dictionary<CCSPlayerController, PlayerState> playerStates = new();
-
-    private NadeManager? nadeManager;
-    private KnifeCooldownManager? knifeCooldownManager;
-    private TeamSwitchManager? teamSwitchManager;
+    private PlayerFreezeManager? _freezeManager;
+    private RoundStartFreezeTimeManager? _roundStartFreezeTimeManager;
+    private NadeManager? _nadeManager;
+    private KnifeCooldownManager? _knifeCooldownManager;
+    private TeamSwitchManager? _teamSwitchManager;
 
     public override void Load(bool hotReload)
     {
-        nadeManager = new NadeManager(this);
-        knifeCooldownManager = new KnifeCooldownManager(this);
-        teamSwitchManager = new TeamSwitchManager(this); 
-
-        if (hotReload)
-        {
-            // Use regular GetPlayers as we want all players to have PlayerState
-            foreach (var controller in Utilities.GetPlayers())
-            {
-                playerStates[controller] = new PlayerState();
-            }
-        }
+        _freezeManager = new(this);
+        _roundStartFreezeTimeManager = new RoundStartFreezeTimeManager(this, _freezeManager);
+        _nadeManager = new NadeManager(this, _freezeManager, _roundStartFreezeTimeManager);
+        _knifeCooldownManager = new KnifeCooldownManager(this);
+        _teamSwitchManager = new TeamSwitchManager(this);
 
         RegisterEventHandler<EventPlayerJump>((player, info) =>
         {
@@ -50,110 +43,99 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 
         MiscCommands.AddCommands(this);
 
-        nadeManager.EnableHooks();
-        knifeCooldownManager.EnableHooks();
+        _nadeManager.EnableHooks();
+        _knifeCooldownManager.EnableHooks();
         TriggerWorkaround.HookTriggerOutput(this);
-        teamSwitchManager.Start();
+        _teamSwitchManager.Start();
+        _roundStartFreezeTimeManager.Start();
 
-        RegisterEventHandler<EventPlayerSpawned>((@event, info) =>
-        {
-            var player = @event.Userid;
-
-            if (!player.IsValid)
-            {
-                return HookResult.Continue;
-            }
-            
-            if (!player.Pawn.IsValid)
-            {
-                return HookResult.Continue;
-            }
-
-            var pawn = player.Pawn.Value;
-
-
-            return HookResult.Continue;
-          
-        });
-
-        RegisterEventHandler<EventPlayerConnectFull>((@event, info) =>
-        {
-            playerStates[@event.Userid] = new PlayerState();
-            return HookResult.Continue;
-        });
-
-        RegisterEventHandler<EventPlayerDisconnect>((@event, info) =>
-        {
-            var player = @event.Userid;
-
-            if (!player.IsValid)
-            {
-                return HookResult.Continue;
-            }
-
-            playerStates.Remove(player);
-
-            return HookResult.Continue;
-        });
-
-        RegisterEventHandler<EventRoundFreezeEnd>((@event, info) =>
-        {
-            Server.NextFrame(() =>
-            {
-                TriggerWorkaround.DisableWorkaroundTriggers();
-            });
-
-            return HookResult.Continue;
-        });
-        
-        RegisterListener<Listeners.OnTick>(() =>
-        {
-            foreach (var controller in ChaseModUtils.GetAllRealPlayers())
-            {
-                if (controller is not { IsBot: false, PawnIsAlive: true, LifeState: (byte)LifeState_t.LIFE_ALIVE } || !controller.Pawn.IsValid)
-                {
-                    continue;
-                }
-
-                var pawn = controller.Pawn.Value;
-                if (pawn == null)
-                {
-                    continue;
-                }
-
-                if (controller.Team == CsTeam.CounterTerrorist)
-                {
-					var weapons = pawn.WeaponServices?.MyWeapons;
-					if (weapons == null)
-					{
-						continue;
-					}
-
-					foreach (var weapon in weapons)
-					{
-						if (weapon.IsValid && weapon.Value?.DesignerName == "weapon_knife" && weapon.Value.NextPrimaryAttackTick <= Server.TickCount + (64 * 5))
-						{
-							weapon.Value.NextPrimaryAttackTick = Server.TickCount + (64 * 10);
-							Utilities.SetStateChanged(weapon.Value, "CBasePlayerWeapon", "m_nNextPrimaryAttackTick");
-						}
-					}
-				}
-
-            }
-        });
-
+        RegisterListener<Listeners.OnTick>(OnTick);
     }
 
     public override void Unload(bool hotReload)
-    { 
+    {
         if (hotReload)
         {
-            nadeManager?.DisableHooks();
-            knifeCooldownManager?.DisableHooks();
+            _nadeManager?.DisableHooks();
+            _knifeCooldownManager?.DisableHooks();
+        }
+    }
+
+    [GameEventHandler]
+    public HookResult OnEventRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
+    {
+        Server.NextFrame(() =>
+        {
+            TriggerWorkaround.DisableWorkaroundTriggers();
+        });
+        return HookResult.Continue;
+    }
+
+    public void OnTick()
+    {
+        foreach (var controller in ChaseModUtils.GetAllRealPlayers())
+        {
+            if (controller is not { IsBot: false, LifeState: (byte)LifeState_t.LIFE_ALIVE })
+            {
+                continue;
+            }
+
+            var pawn = controller.PlayerPawn.Value!;
+
+            var weapons = pawn.WeaponServices?.MyWeapons;
+            if (weapons == null)
+            {
+                continue;
+            }
+
+            // I'm not entirely sure why it's like this, but literally every other way
+            // I tried is unreliable (it lets left clicks through sometimes...)
+            var tickThreshold = Server.TickCount + (64 * 60);
+            var tickNextAttack = Server.TickCount + (64 * 120);
+
+            var freezeRemaining = _freezeManager?.GetPlayerFreezeRemaining(controller) ?? 0;
+            var unfreezeTick = Server.TickCount + (int)(0.5f + (freezeRemaining / Server.TickInterval));
+
+            foreach (var weaponHandle in weapons)
+            {
+                if (!weaponHandle.IsValid) continue;
+
+                var weapon = weaponHandle.Value!;
+
+                if (freezeRemaining > 0)
+                {
+                    if (weapon.NextPrimaryAttackTick <= unfreezeTick 
+                        || weapon.NextSecondaryAttackTick <= unfreezeTick)
+                    {
+                        weapon.DisableUntil(unfreezeTick);
+                    }
+                }
+
+                if (weapon.DesignerName == "weapon_knife")
+                {
+                    if (controller.Team == CsTeam.CounterTerrorist)
+                    {
+                        if (weapon.NextPrimaryAttackTick <= tickThreshold)
+                        {
+                            weapon.DisableUntil(tickNextAttack, null);
+                        }
+                    }
+                    else if (controller.Team == CsTeam.Terrorist)
+                    {
+                        var resetKnife = weapon.NextPrimaryAttackTick <= tickThreshold
+                            || weapon.NextSecondaryAttackTick <= tickThreshold;
+                        if (Config.AlwaysDisableTerroristKnife && resetKnife)
+                        {
+                            weapon.DisableUntil(tickNextAttack);
+                        }
+                    }
+                }
+
+            }
         }
     }
 
 
-  
+
 }
 
