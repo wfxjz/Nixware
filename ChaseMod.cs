@@ -30,7 +30,7 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 
     public override void Load(bool hotReload)
     {
-        _freezeManager = new(this);
+        _freezeManager = new PlayerFreezeManager(this);
         _roundStartFreezeTimeManager = new RoundStartFreezeTimeManager(this, _freezeManager);
         _nadeManager = new NadeManager(this, _freezeManager, _roundStartFreezeTimeManager);
         _knifeCooldownManager = new KnifeCooldownManager(this);
