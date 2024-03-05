@@ -54,6 +54,12 @@ internal class RoundStartFreezeTimeManager
 				_playerFreezeManager.Freeze(player, _plugin.Config.RoundStartFreezeTime, true, false, true);
             }
 
+			if (_countdownTimer != null)
+			{
+				_countdownTimer.Kill();
+				_countdownTimer = null;
+			}
+
 			_countdownTimer = _plugin.AddTimer(0.1f, CountdownTimerTick, TimerFlags.REPEAT);
 
 			return HookResult.Continue;
