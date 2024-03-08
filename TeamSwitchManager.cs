@@ -90,6 +90,7 @@ internal class TeamSwitchManager
             {
                 controller.SwitchTeam(CsTeam.CounterTerrorist);
             }
+            controller.RemoveAllItemsOnNextRoundReset = true;
         }
         _switchingTeams = false;
     }
