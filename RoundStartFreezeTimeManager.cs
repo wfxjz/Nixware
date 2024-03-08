@@ -43,12 +43,7 @@ internal class RoundStartFreezeTimeManager
                 return HookResult.Continue;
             }
 
-            var falldamageScale = ConVar.Find("sv_falldamage_scale");
-            if (falldamageScale != null)
-            {
-                _normalFalldamageScale = falldamageScale.GetPrimitiveValue<float>();
-                falldamageScale.SetValue<float>(0);
-            }
+            SwitchFallDamage(false);
 
             foreach (var player in ChaseModUtils.GetAllRealPlayers())
             {
@@ -63,6 +58,7 @@ internal class RoundStartFreezeTimeManager
 
             if (_countdownTimer != null)
             {
+                SwitchFallDamage(true);
                 _countdownTimer.Kill();
                 _countdownTimer = null;
             }
@@ -78,12 +74,7 @@ internal class RoundStartFreezeTimeManager
         var timeLeft = FrozenUntilTime - Server.CurrentTime;
         if (timeLeft <= 0)
         {
-            if (_normalFalldamageScale != null)
-            {
-                // convar SetValue isn't replicated on clients it seems...
-                Server.ExecuteCommand($"sv_falldamage_scale {_normalFalldamageScale}");
-            }
-
+            SwitchFallDamage(true);
             _countdownTimer?.Kill();
             _countdownTimer = null;
         }
@@ -91,6 +82,25 @@ internal class RoundStartFreezeTimeManager
         foreach (var player in ChaseModUtils.GetAllRealPlayers())
         {
             player.PrintToCenter(timeLeft > 0 ? $"Round begins in {timeLeft:0.0} seconds!" : "Round start!");
+        }
+    }
+
+    private void SwitchFallDamage(bool enabled)
+    {
+        if (enabled)
+        {
+            // convar SetValue isn't replicated on clients it seems...
+            Server.ExecuteCommand($"sv_falldamage_scale {_normalFalldamageScale ?? 1}");
+        }
+        else
+        {
+            var falldamageScale = ConVar.Find("sv_falldamage_scale");
+            if (falldamageScale != null)
+            {
+                _normalFalldamageScale = falldamageScale.GetPrimitiveValue<float>();
+            }
+            
+            Server.ExecuteCommand($"sv_falldamage_scale 0");
         }
     }
 
