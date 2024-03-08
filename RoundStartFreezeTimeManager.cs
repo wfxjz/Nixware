@@ -94,12 +94,15 @@ internal class RoundStartFreezeTimeManager
         }
         else
         {
-            var falldamageScale = ConVar.Find("sv_falldamage_scale");
-            if (falldamageScale != null)
+            if (_normalFalldamageScale == null)
             {
-                _normalFalldamageScale = falldamageScale.GetPrimitiveValue<float>();
+                var falldamageScale = ConVar.Find("sv_falldamage_scale");
+                if (falldamageScale != null)
+                {
+                    _normalFalldamageScale = falldamageScale.GetPrimitiveValue<float>();
+                }
             }
-            
+
             Server.ExecuteCommand($"sv_falldamage_scale 0");
         }
     }
