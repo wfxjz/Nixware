@@ -28,8 +28,8 @@ internal class TeamSwitchManager
 			var winner = @event.Winner;
 			if (winner == (int)CsTeam.CounterTerrorist)
 			{
-				_terroristWinstreak = 0;
 				ChaseModUtils.ChatAllPrefixed($"{ChatColors.Blue}CT {ChatColors.Grey}Win - Teams are being switched.");
+				_terroristWinstreak = 0;
 				Server.NextFrame(() =>
 				{
 					SwitchTeams();
@@ -40,8 +40,8 @@ internal class TeamSwitchManager
 				_terroristWinstreak++;
 				if (_plugin.Config.MaxTerroristWinStreak > 0 && _terroristWinstreak >= _plugin.Config.MaxTerroristWinStreak)
 				{
-					_terroristWinstreak = 0;
 					ChaseModUtils.ChatAllPrefixed($"{ChatColors.Yellow}T {ChatColors.Grey}Win - Teams are being switched due to winstreak. ({_terroristWinstreak} wins in a row)");
+					_terroristWinstreak = 0;
 					Server.NextFrame(() =>
 					{
 						SwitchTeams();
