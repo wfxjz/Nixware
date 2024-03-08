@@ -32,7 +32,7 @@ public static class Extensions
 
     public static Vector3 ToManaged(this Vector thisVector) => new Vector3(thisVector.X, thisVector.Y, thisVector.Z);
 
-    
+
     public static void DisableUntil(this CBasePlayerWeapon weapon, int? primaryTick, int? secondaryTick)
     {
         if (primaryTick != null)
@@ -46,7 +46,7 @@ public static class Extensions
             Utilities.SetStateChanged(weapon, "CBasePlayerWeapon", "m_nNextSecondaryAttackTick");
         }
     }
-    public static void DisableUntil(this CBasePlayerWeapon weapon, int tick) => DisableUntil(weapon, tick, tick); 
+    public static void DisableUntil(this CBasePlayerWeapon weapon, int tick) => DisableUntil(weapon, tick, tick);
 
     public static void DisableAllWeaponsUntil(this CPlayer_WeaponServices weaponServices, int tick)
     {

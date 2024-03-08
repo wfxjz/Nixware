@@ -9,116 +9,116 @@ namespace ChaseMod;
 internal class NadeManager
 {
 
-	private static ILogger Logger = CoreLogging.Factory.CreateLogger("FreezeNadeManager");
+    private static ILogger Logger = CoreLogging.Factory.CreateLogger("FreezeNadeManager");
 
-	private readonly ChaseMod _plugin;
-	private readonly PlayerFreezeManager _playerFreezeManager;
-	private readonly RoundStartFreezeTimeManager _roundStartFreezeTimeManager;
-	public NadeManager(
-		ChaseMod chaseMod, PlayerFreezeManager playerFreezeManager, 
-		RoundStartFreezeTimeManager roundStartFreezeTimeManager)
-	{
-		_plugin = chaseMod;
-		_playerFreezeManager = playerFreezeManager;
-		_roundStartFreezeTimeManager = roundStartFreezeTimeManager;
-	}
+    private readonly ChaseMod _plugin;
+    private readonly PlayerFreezeManager _playerFreezeManager;
+    private readonly RoundStartFreezeTimeManager _roundStartFreezeTimeManager;
+    public NadeManager(
+        ChaseMod chaseMod, PlayerFreezeManager playerFreezeManager,
+        RoundStartFreezeTimeManager roundStartFreezeTimeManager)
+    {
+        _plugin = chaseMod;
+        _playerFreezeManager = playerFreezeManager;
+        _roundStartFreezeTimeManager = roundStartFreezeTimeManager;
+    }
 
-	public void EnableHooks()
-	{
-		GrenadeFunctions.CSmokeGrenadeProjectile_CreateFunc.Hook(CSmokeGrenadeProjectile_CreateHook, HookMode.Post);
-		_plugin.RegisterEventHandler<EventPlayerBlind>((@event, info) =>
-		{
-			if (!ChaseModUtils.IsRealPlayer(@event.Attacker) || !ChaseModUtils.IsRealPlayer(@event.Userid))
-			{
-				return HookResult.Continue;
-			}
+    public void EnableHooks()
+    {
+        GrenadeFunctions.CSmokeGrenadeProjectile_CreateFunc.Hook(CSmokeGrenadeProjectile_CreateHook, HookMode.Post);
+        _plugin.RegisterEventHandler<EventPlayerBlind>((@event, info) =>
+        {
+            if (!ChaseModUtils.IsRealPlayer(@event.Attacker) || !ChaseModUtils.IsRealPlayer(@event.Userid))
+            {
+                return HookResult.Continue;
+            }
 
-			if (@event.Attacker.Team == @event.Userid.Team)
-			{
-				@event.Userid.PlayerPawn.Value!.BlindUntilTime = 0;
-			}
+            if (@event.Attacker.Team == @event.Userid.Team)
+            {
+                @event.Userid.PlayerPawn.Value!.BlindUntilTime = 0;
+            }
 
-			return HookResult.Continue;
-		});
-	}
+            return HookResult.Continue;
+        });
+    }
 
-	public void DisableHooks()
-	{
-		GrenadeFunctions.CSmokeGrenadeProjectile_CreateFunc.Unhook(CSmokeGrenadeProjectile_CreateHook, HookMode.Post);
-	}
+    public void DisableHooks()
+    {
+        GrenadeFunctions.CSmokeGrenadeProjectile_CreateFunc.Unhook(CSmokeGrenadeProjectile_CreateHook, HookMode.Post);
+    }
 
-	private HookResult CSmokeGrenadeProjectile_CreateHook(DynamicHook hook)
-	{
-		Logger.LogDebug("Freezenade thrown");
+    private HookResult CSmokeGrenadeProjectile_CreateHook(DynamicHook hook)
+    {
+        Logger.LogDebug("Freezenade thrown");
 
-		var smoke = hook.GetReturn<CSmokeGrenadeProjectile>(0);
-		smoke.NextThinkTick = -1;
-		
-		_plugin.AddTimer(_plugin.Config.StunThrowTime, () => FreezeGrenadeExplode(smoke));
+        var smoke = hook.GetReturn<CSmokeGrenadeProjectile>(0);
+        smoke.NextThinkTick = -1;
 
-		return HookResult.Continue;
-	}
+        _plugin.AddTimer(_plugin.Config.StunThrowTime, () => FreezeGrenadeExplode(smoke));
 
-	private void FreezeGrenadeExplode(CSmokeGrenadeProjectile smoke)
-	{
-		Logger.LogDebug("Freezenade explode");
+        return HookResult.Continue;
+    }
 
-		if (!smoke.IsValid)
-		{
-			return;
-		}
+    private void FreezeGrenadeExplode(CSmokeGrenadeProjectile smoke)
+    {
+        Logger.LogDebug("Freezenade explode");
 
-		if (_roundStartFreezeTimeManager.IsInFreezeTime())
-		{
-			smoke.Remove();
-			return;
-		}
+        if (!smoke.IsValid)
+        {
+            return;
+        }
 
-		var decoyCoord = smoke.AbsOrigin;
-		if (decoyCoord == null)
-		{
-			return;
-		}
+        if (_roundStartFreezeTimeManager.IsInFreezeTime())
+        {
+            smoke.Remove();
+            return;
+        }
 
-		var thrower = smoke.OwnerEntity;
-		if (!thrower.IsValid || thrower.Value == null)
-		{
-			return;
-		}
+        var decoyCoord = smoke.AbsOrigin;
+        if (decoyCoord == null)
+        {
+            return;
+        }
 
-		var players = ChaseModUtils.GetAllRealPlayers();
-		foreach (var other in players)
-		{
-			var pawn = other.PlayerPawn.Value!;
-			if (pawn.LifeState != (byte)LifeState_t.LIFE_ALIVE)
-			{
-				continue;
-			}
+        var thrower = smoke.OwnerEntity;
+        if (!thrower.IsValid || thrower.Value == null)
+        {
+            return;
+        }
 
-			if (!_plugin.Config.StunSameTeam && other.TeamNum == thrower.Value.TeamNum)
-			{
-				continue;
-			}
+        var players = ChaseModUtils.GetAllRealPlayers();
+        foreach (var other in players)
+        {
+            var pawn = other.PlayerPawn.Value!;
+            if (pawn.LifeState != (byte)LifeState_t.LIFE_ALIVE)
+            {
+                continue;
+            }
 
-			var pcCoord = pawn.AbsOrigin;
-			if (pcCoord == null)
-			{
-				Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
-				continue;
-			}
+            if (!_plugin.Config.StunSameTeam && other.TeamNum == thrower.Value.TeamNum)
+            {
+                continue;
+            }
 
-			var distance = pcCoord.Distance(decoyCoord);
-			Logger.LogDebug($"Distance between FreezeNade and {other.PlayerName} = {distance}");
+            var pcCoord = pawn.AbsOrigin;
+            if (pcCoord == null)
+            {
+                Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
+                continue;
+            }
 
-			if (distance > _plugin.Config.StunFreezeRadius)
-			{
-				continue;
-			}
+            var distance = pcCoord.Distance(decoyCoord);
+            Logger.LogDebug($"Distance between FreezeNade and {other.PlayerName} = {distance}");
 
-			_playerFreezeManager.Freeze(other, _plugin.Config.StunFreezeTime, true, true, false);
-		}
+            if (distance > _plugin.Config.StunFreezeRadius)
+            {
+                continue;
+            }
 
-		smoke.Remove();
-	}
+            _playerFreezeManager.Freeze(other, _plugin.Config.StunFreezeTime, true, true, false);
+        }
+
+        smoke.Remove();
+    }
 
 }

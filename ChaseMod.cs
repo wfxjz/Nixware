@@ -80,6 +80,10 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
                 continue;
             }
 
+            if (!controller.PlayerPawn.IsValid)
+            {
+                continue;
+            }
             var pawn = controller.PlayerPawn.Value!;
 
             var weapons = pawn.WeaponServices?.MyWeapons;
@@ -104,7 +108,7 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 
                 if (freezeRemaining > 0)
                 {
-                    if (weapon.NextPrimaryAttackTick <= unfreezeTick 
+                    if (weapon.NextPrimaryAttackTick <= unfreezeTick
                         || weapon.NextSecondaryAttackTick <= unfreezeTick)
                     {
                         weapon.DisableUntil(unfreezeTick);
@@ -134,8 +138,6 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
             }
         }
     }
-
-
 
 }
 

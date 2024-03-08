@@ -16,12 +16,12 @@ internal class PlayerFreezeManager
 {
     private static ILogger Logger = CoreLogging.Factory.CreateLogger("RoundStartFreezeTimeManager");
 
-	private ChaseMod _plugin;
-	private readonly Dictionary<CCSPlayerController, FrozenPlayer> _frozenPlayers = new();
-	public PlayerFreezeManager(ChaseMod chaseMod)
-	{
-		_plugin = chaseMod;
-	}
+    private ChaseMod _plugin;
+    private readonly Dictionary<CCSPlayerController, FrozenPlayer> _frozenPlayers = new();
+    public PlayerFreezeManager(ChaseMod chaseMod)
+    {
+        _plugin = chaseMod;
+    }
 
     public void Freeze(CCSPlayerController controller, float time, bool showEffect, bool sendMessage, bool resetVelocity)
     {
@@ -33,24 +33,27 @@ internal class PlayerFreezeManager
 
         if (_frozenPlayers.TryGetValue(controller, out var freezeState))
         {
-            if(!resetVelocity) origVelocity = freezeState.StoredVelocity;
+            if (!resetVelocity) origVelocity = freezeState.StoredVelocity;
             freezeState.Timer.Kill();
         }
 
         pawn.FreezePlayer();
 
-		pawn.Render = Color.FromArgb(255, 4, 58, 140);
-		Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
+        pawn.Render = Color.FromArgb(255, 4, 58, 140);
+        Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
 
-		pawn.HealthShotBoostExpirationTime = Server.CurrentTime + time;
-		Utilities.SetStateChanged(pawn, "CCSPlayerPawn", "m_flHealthShotBoostExpirationTime");
+        if (showEffect)
+        {
+            pawn.HealthShotBoostExpirationTime = Server.CurrentTime + time;
+            Utilities.SetStateChanged(pawn, "CCSPlayerPawn", "m_flHealthShotBoostExpirationTime");
+        }
 
-		if (pawn.WeaponServices != null)
-		{
-			var activeWeaponHandle = pawn.WeaponServices.ActiveWeapon;
-			if (activeWeaponHandle.IsValid)
-				activeWeaponHandle.Value!.DisableUntil(Server.TickCount + (int)(0.5f + (time / Server.TickInterval)));
-		}
+        if (pawn.WeaponServices != null)
+        {
+            var activeWeaponHandle = pawn.WeaponServices.ActiveWeapon;
+            if (activeWeaponHandle.IsValid)
+                activeWeaponHandle.Value!.DisableUntil(Server.TickCount + (int)(0.5f + (time / Server.TickInterval)));
+        }
 
         var timer = _plugin.AddTimer(
             time, () => Unfreeze(controller, sendMessage));
@@ -59,8 +62,8 @@ internal class PlayerFreezeManager
 
         if (sendMessage)
         {
-			ChaseModUtils.ChatPrefixed(
-                controller, 
+            ChaseModUtils.ChatPrefixed(
+                controller,
                 $"{ChatColors.DarkRed}⚠{ChatColors.Grey} You have been {ChatColors.DarkRed}frozen{ChatColors.Grey}.");
         }
     }
@@ -72,8 +75,8 @@ internal class PlayerFreezeManager
 
         pawn.UnfreezePlayer();
 
-		pawn.Render = Color.White;
-		Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
+        pawn.Render = Color.White;
+        Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
 
         if (_frozenPlayers.TryGetValue(controller, out var frozenState))
         {
@@ -85,7 +88,7 @@ internal class PlayerFreezeManager
         if (sendMessage)
         {
             ChaseModUtils.ChatPrefixed(
-                controller, 
+                controller,
                 $"{ChatColors.Green}⚠{ChatColors.Grey} You are now {ChatColors.Green}unfrozen{ChatColors.Grey}.");
         }
     }
