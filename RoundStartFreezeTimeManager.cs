@@ -35,6 +35,12 @@ internal class RoundStartFreezeTimeManager
     {
         _plugin.RegisterEventHandler<EventRoundFreezeEnd>((@event, info) =>
         {
+            var gameRules = ChaseModUtils.GetGameRules();
+            if (gameRules.WarmupPeriod)
+            {
+                return HookResult.Continue;
+            }
+
             _roundStartTime = Server.CurrentTime;
             _roundStartTick = Server.TickCount;
 

@@ -75,8 +75,7 @@ internal class TeamSwitchManager
     private void SwitchTeams()
     {
         _switchingTeams = true;
-        var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
-            .First().GameRules!;
+        var gameRules = ChaseModUtils.GetGameRules();
         CCSMatch.SwapTeamScores(gameRules);
 
         foreach (var controller in ChaseModUtils.GetAllRealPlayers())
