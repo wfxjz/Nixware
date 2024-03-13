@@ -64,7 +64,6 @@ internal class RoundStartFreezeTimeManager
 
             if (_countdownTimer != null)
             {
-                SwitchFallDamage(true);
                 _countdownTimer.Kill();
                 _countdownTimer = null;
             }
