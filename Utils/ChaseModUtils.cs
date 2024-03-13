@@ -27,6 +27,7 @@ public static class ChaseModUtils
         return
             p.IsValid &&
             p.PlayerPawn.IsValid && p.PlayerPawn.Value != null &&
+            p.PlayerPawn.Value.IsValid &&
             p.Connected == PlayerConnectedState.PlayerConnected &&
             !p.IsHLTV &&
             (
