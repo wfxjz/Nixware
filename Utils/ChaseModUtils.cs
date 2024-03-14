@@ -16,10 +16,10 @@ public static class ChaseModUtils
 
     public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    public static CCSGameRules GetGameRules()
+    public static CCSGameRules? GetGameRules()
     {
         return Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
-            .First().GameRules!;
+            .First().GameRules;
     } 
 
     public static bool IsRealPlayer(CCSPlayerController p)

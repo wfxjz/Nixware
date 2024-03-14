@@ -36,7 +36,7 @@ internal class RoundStartFreezeTimeManager
         _plugin.RegisterEventHandler<EventRoundFreezeEnd>((@event, info) =>
         {
             var gameRules = ChaseModUtils.GetGameRules();
-            if (gameRules.WarmupPeriod)
+            if (gameRules == null || gameRules.WarmupPeriod)
             {
                 return HookResult.Continue;
             }
