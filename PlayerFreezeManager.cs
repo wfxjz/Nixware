@@ -10,7 +10,13 @@ using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
 
 namespace ChaseMod;
 
-public record FrozenPlayer(float Time, float StartTime, System.Numerics.Vector3 StoredVelocity, Timer Timer);
+public record FrozenPlayer(
+    float Time, 
+    float StartTime,
+    byte StoredPlayerAlpha,
+    System.Numerics.Vector3 StoredVelocity, 
+    Timer Timer
+);
 
 internal class PlayerFreezeManager
 {
@@ -39,7 +45,9 @@ internal class PlayerFreezeManager
 
         pawn.FreezePlayer();
 
-        pawn.Render = Color.FromArgb(255, 4, 58, 140);
+        var playerAlpha = pawn.Render.A;
+
+        pawn.Render = Color.FromArgb(playerAlpha, 4, 58, 140);
         Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
 
         if (showEffect)
@@ -58,7 +66,7 @@ internal class PlayerFreezeManager
         var timer = _plugin.AddTimer(
             time, () => Unfreeze(controller, sendMessage));
 
-        _frozenPlayers[controller] = new FrozenPlayer(time, Server.CurrentTime, origVelocity, timer);
+        _frozenPlayers[controller] = new FrozenPlayer(time, Server.CurrentTime, playerAlpha, origVelocity, timer);
 
         if (sendMessage)
         {
@@ -75,13 +83,17 @@ internal class PlayerFreezeManager
 
         pawn.UnfreezePlayer();
 
-        pawn.Render = Color.White;
-        Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
-
         if (_frozenPlayers.TryGetValue(controller, out var frozenState))
         {
             pawn.AbsVelocity.Set(frozenState.StoredVelocity);
+            pawn.Render = Color.FromArgb(frozenState.StoredPlayerAlpha, 255, 255, 255);
         }
+        else
+        {
+            pawn.Render = Color.White;
+        }
+
+        Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
 
         _frozenPlayers.Remove(controller);
 
