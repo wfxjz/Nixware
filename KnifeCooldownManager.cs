@@ -9,8 +9,6 @@ using Microsoft.Extensions.Logging;
 namespace ChaseMod;
 internal class KnifeCooldownManager
 {
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("KnifeCooldownManager");
-
     private readonly ChaseMod _plugin;
     private readonly Dictionary<CBasePlayerController, DateTime> _invulnerablePlayers = new();
 
@@ -87,5 +85,4 @@ internal class KnifeCooldownManager
         _invulnerablePlayers[controller] = DateTime.Now.AddSeconds(_plugin.Config.KnifeCooldown);
         return HookResult.Continue;
     }
-
 }

@@ -20,10 +20,9 @@ public record FrozenPlayer(
 
 internal class PlayerFreezeManager
 {
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("RoundStartFreezeTimeManager");
-
-    private ChaseMod _plugin;
+    private readonly ChaseMod _plugin;
     private readonly Dictionary<CCSPlayerController, FrozenPlayer> _frozenPlayers = new();
+    
     public PlayerFreezeManager(ChaseMod chaseMod)
     {
         _plugin = chaseMod;

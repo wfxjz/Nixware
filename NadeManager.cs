@@ -8,9 +8,6 @@ using ChaseMod.Utils;
 namespace ChaseMod;
 internal class NadeManager
 {
-
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("FreezeNadeManager");
-
     private readonly ChaseMod _plugin;
     private readonly PlayerFreezeManager _playerFreezeManager;
     private readonly RoundStartFreezeTimeManager _roundStartFreezeTimeManager;
@@ -49,7 +46,7 @@ internal class NadeManager
 
     private HookResult CSmokeGrenadeProjectile_CreateHook(DynamicHook hook)
     {
-        Logger.LogDebug("Freezenade thrown");
+        ChaseMod.Logger.LogDebug("Freezenade thrown");
 
         var smoke = hook.GetReturn<CSmokeGrenadeProjectile>(0);
         smoke.NextThinkTick = -1;
@@ -61,7 +58,7 @@ internal class NadeManager
 
     private void FreezeGrenadeExplode(CSmokeGrenadeProjectile smoke)
     {
-        Logger.LogDebug("Freezenade explode");
+        ChaseMod.Logger.LogDebug("Freezenade explode");
 
         if (!smoke.IsValid)
         {
@@ -103,12 +100,12 @@ internal class NadeManager
             var pcCoord = pawn.AbsOrigin;
             if (pcCoord == null)
             {
-                Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
+                ChaseMod.Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
                 continue;
             }
 
             var distance = pcCoord.Distance(decoyCoord);
-            Logger.LogDebug($"Distance between FreezeNade and {other.PlayerName} = {distance}");
+            ChaseMod.Logger.LogDebug($"Distance between FreezeNade and {other.PlayerName} = {distance}");
 
             if (distance > _plugin.Config.StunFreezeRadius)
             {

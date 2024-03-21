@@ -13,7 +13,7 @@ namespace ChaseMod;
 [MinimumApiVersion(180)]
 public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 {
-    private new static ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModCS#");
+    public new static ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModCS#");
 
     public override string ModuleName => "HnS ChaseMod";
     public override string ModuleAuthor => "svn";
@@ -134,10 +134,7 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
                         }
                     }
                 }
-
             }
         }
     }
-
 }
-
