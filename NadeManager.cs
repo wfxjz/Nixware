@@ -1,5 +1,4 @@
-﻿using CounterStrikeSharp.API.Core.Logging;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
 using Microsoft.Extensions.Logging;
 using ChaseMod.Utils.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
@@ -71,8 +70,8 @@ internal class NadeManager
             return;
         }
 
-        var decoyCoord = smoke.AbsOrigin;
-        if (decoyCoord == null)
+        var smokeProjectileOrigin = smoke.AbsOrigin;
+        if (smokeProjectileOrigin == null)
         {
             return;
         }
@@ -84,38 +83,37 @@ internal class NadeManager
         }
 
         var players = ChaseModUtils.GetAllRealPlayers();
-        foreach (var other in players)
+        foreach (var player in players)
         {
-            var pawn = other.PlayerPawn.Value!;
+            var pawn = player.PlayerPawn.Value!;
             if (pawn.LifeState != (byte)LifeState_t.LIFE_ALIVE)
             {
                 continue;
             }
 
-            if (!_plugin.Config.StunSameTeam && other.TeamNum == thrower.Value.TeamNum)
+            if (!_plugin.Config.StunSameTeam && player.TeamNum == thrower.Value.TeamNum)
             {
                 continue;
             }
 
-            var pcCoord = pawn.AbsOrigin;
-            if (pcCoord == null)
+            var playerOrigin = pawn.AbsOrigin;
+            if (playerOrigin == null)
             {
                 ChaseMod.Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
                 continue;
             }
 
-            var distance = pcCoord.Distance(decoyCoord);
-            ChaseMod.Logger.LogDebug($"Distance between FreezeNade and {other.PlayerName} = {distance}");
+            var distance = playerOrigin.Distance(smokeProjectileOrigin);
+            ChaseMod.Logger.LogDebug($"Distance between FreezeNade and {player.PlayerName} = {distance}");
 
             if (distance > _plugin.Config.StunFreezeRadius)
             {
                 continue;
             }
 
-            _playerFreezeManager.Freeze(other, _plugin.Config.StunFreezeTime, true, true, false);
+            _playerFreezeManager.Freeze(player, _plugin.Config.StunFreezeTime, true, true, false);
         }
 
         smoke.Remove();
     }
-
 }

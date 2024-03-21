@@ -9,12 +9,12 @@ public static class Extensions
 {
     public static float Distance(this Vector thisVector, Vector vector2)
     {
-        float deltaX = vector2.X - thisVector.X;
-        float deltaY = vector2.Y - thisVector.Y;
-        float deltaZ = vector2.Z - thisVector.Z;
+        var deltaX = vector2.X - thisVector.X;
+        var deltaY = vector2.Y - thisVector.Y;
+        var deltaZ = vector2.Z - thisVector.Z;
 
-        float distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-        float distance = (float)Math.Sqrt(distanceSquared);
+        var distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+        var distance = (float)Math.Sqrt(distanceSquared);
 
         return distance;
     }
@@ -40,12 +40,14 @@ public static class Extensions
             weapon.NextPrimaryAttackTick = primaryTick.Value;
             Utilities.SetStateChanged(weapon, "CBasePlayerWeapon", "m_nNextPrimaryAttackTick");
         }
+        
         if (secondaryTick != null)
         {
             weapon.NextSecondaryAttackTick = secondaryTick.Value;
             Utilities.SetStateChanged(weapon, "CBasePlayerWeapon", "m_nNextSecondaryAttackTick");
         }
     }
+    
     public static void DisableUntil(this CBasePlayerWeapon weapon, int tick) => DisableUntil(weapon, tick, tick);
 
     public static void DisableAllWeaponsUntil(this CPlayer_WeaponServices weaponServices, int tick)
@@ -63,8 +65,7 @@ public static class Extensions
         Utilities.SetStateChanged(pawn, "CBaseEntity", "m_MoveType");
         Schema.GetRef<MoveType_t>(pawn.Handle, "CBaseEntity", "m_nActualMoveType") = moveType;
     }
+    
     public static void FreezePlayer(this CCSPlayerPawn pawn) => pawn.SetMoveType(MoveType_t.MOVETYPE_OBSOLETE);
     public static void UnfreezePlayer(this CCSPlayerPawn pawn) => pawn.SetMoveType(MoveType_t.MOVETYPE_WALK);
-
-
 }
