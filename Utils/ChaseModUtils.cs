@@ -1,12 +1,7 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API;
-using System;
-using CounterStrikeSharp.API.Modules.Entities.Constants;
-using CounterStrikeSharp.API.Modules.Memory;
 using System.Runtime.InteropServices;
 using CounterStrikeSharp.API.Modules.Utils;
-using CounterStrikeSharp.API.Core.Logging;
-using Microsoft.Extensions.Logging;
 
 namespace ChaseMod.Utils;
 

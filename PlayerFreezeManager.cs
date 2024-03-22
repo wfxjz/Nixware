@@ -1,9 +1,7 @@
 using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Core.Logging;
 using CounterStrikeSharp.API.Modules.Utils;
-using Microsoft.Extensions.Logging;
 using ChaseMod.Utils;
 
 using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
