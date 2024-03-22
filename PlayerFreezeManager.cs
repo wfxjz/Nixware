@@ -13,7 +13,6 @@ namespace ChaseMod;
 public record FrozenPlayer(
     float Time, 
     float StartTime,
-    byte StoredPlayerAlpha,
     System.Numerics.Vector3 StoredVelocity, 
     Timer Timer
 );
@@ -65,7 +64,7 @@ internal class PlayerFreezeManager
         var timer = _plugin.AddTimer(
             time, () => Unfreeze(controller, sendMessage));
 
-        _frozenPlayers[controller] = new FrozenPlayer(time, Server.CurrentTime, playerAlpha, origVelocity, timer);
+        _frozenPlayers[controller] = new FrozenPlayer(time, Server.CurrentTime, origVelocity, timer);
 
         if (sendMessage)
         {
@@ -85,13 +84,9 @@ internal class PlayerFreezeManager
         if (_frozenPlayers.TryGetValue(controller, out var frozenState))
         {
             pawn.AbsVelocity.Set(frozenState.StoredVelocity);
-            pawn.Render = Color.FromArgb(frozenState.StoredPlayerAlpha, 255, 255, 255);
-        }
-        else
-        {
-            pawn.Render = Color.White;
         }
 
+        pawn.Render = Color.FromArgb(pawn.Render.A, 255, 255, 255);
         Utilities.SetStateChanged(pawn, "CBaseModelEntity", "m_clrRender");
 
         _frozenPlayers.Remove(controller);
