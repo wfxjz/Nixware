@@ -1,18 +1,16 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace ChaseMod.Utils;
+
 public static class TriggerWorkaround
 {
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModTriggerWorkaround");
-
     public static void HookTriggerOutput(ChaseMod plugin)
     {
         plugin.HookEntityOutput("trigger_multiple", "OnEndTouch", (output, name, activator, caller, value, delay) =>
         {
-            if (activator.DesignerName != "player" || activator == null || caller == null)
+            if (activator.DesignerName != "player")
                 return HookResult.Continue;
 
             var pawn = new CCSPlayerPawn(activator.Handle);
@@ -45,10 +43,6 @@ public static class TriggerWorkaround
                         pawn.AbsVelocity.Z += float.Parse(splitValue[3]) * plugin.Config.absvelocityWorkaroundMultiplier;
                         break;
                     }
-                    default:
-                    {
-                        break;
-                    }
                 }
 
                 connection = connection.Next;
@@ -60,17 +54,14 @@ public static class TriggerWorkaround
 
     public static void DisableWorkaroundTriggers()
     {
-        Logger.LogTrace("DisableWorkaroundTriggers");
+        ChaseMod.Logger.LogTrace("DisableWorkaroundTriggers");
         foreach (var item in Utilities.FindAllEntitiesByDesignerName<CTriggerGravity>("trigger_gravity"))
         {
             if (!item.IsValid || item.Entity == null || item.Entity.Name != "boostworkaround.gravity")
                 continue;
 
-            Logger.LogTrace($"Trigger at {item.AbsOrigin?.X} {item.AbsOrigin?.Y} {item.AbsOrigin?.Z}");
+            ChaseMod.Logger.LogTrace($"Trigger at {item.AbsOrigin?.X} {item.AbsOrigin?.Y} {item.AbsOrigin?.Z}");
             item.AcceptInput("Disable");
         }
-
     }
-
 }
-

@@ -1,27 +1,24 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Core.Logging;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.Modules.Timers;
-using Microsoft.Extensions.Logging;
 using ChaseMod.Utils;
 
 using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
 using CounterStrikeSharp.API.Modules.Cvars;
 
 namespace ChaseMod;
+
 internal class RoundStartFreezeTimeManager
 {
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("RoundStartFreezeTimeManager");
-
     private readonly ChaseMod _plugin;
     private readonly PlayerFreezeManager _playerFreezeManager;
     private float _roundStartTime;
     private int _roundStartTick;
     private float? _normalFalldamageScale;
 
-    public float FrozenUntilTime => _roundStartTime + _plugin.Config.RoundStartFreezeTime;
-    public int FrozenUntilTick => _roundStartTick + (int)(_plugin.Config.RoundStartFreezeTime / Server.TickInterval);
+    private float FrozenUntilTime => _roundStartTime + _plugin.Config.RoundStartFreezeTime;
+    private int FrozenUntilTick => _roundStartTick + (int)(_plugin.Config.RoundStartFreezeTime / Server.TickInterval);
 
     private Timer? _countdownTimer;
 
@@ -35,8 +32,7 @@ internal class RoundStartFreezeTimeManager
     {
         _plugin.RegisterEventHandler<EventRoundFreezeEnd>((@event, info) =>
         {
-            var gameRules = ChaseModUtils.GetGameRules();
-            if (gameRules == null || gameRules.WarmupPeriod)
+            if (ChaseModUtils.GetGameRules().WarmupPeriod)
             {
                 return HookResult.Continue;
             }
@@ -116,5 +112,4 @@ internal class RoundStartFreezeTimeManager
     {
         return Server.TickCount < FrozenUntilTick;
     }
-
 }

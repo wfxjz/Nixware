@@ -1,5 +1,4 @@
-﻿using CounterStrikeSharp.API.Core.Logging;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
 using Microsoft.Extensions.Logging;
 using ChaseMod.Utils.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
@@ -8,9 +7,6 @@ using ChaseMod.Utils;
 namespace ChaseMod;
 internal class NadeManager
 {
-
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("FreezeNadeManager");
-
     private readonly ChaseMod _plugin;
     private readonly PlayerFreezeManager _playerFreezeManager;
     private readonly RoundStartFreezeTimeManager _roundStartFreezeTimeManager;
@@ -49,7 +45,7 @@ internal class NadeManager
 
     private HookResult CSmokeGrenadeProjectile_CreateHook(DynamicHook hook)
     {
-        Logger.LogDebug("Freezenade thrown");
+        ChaseMod.Logger.LogDebug("Freezenade thrown");
 
         var smoke = hook.GetReturn<CSmokeGrenadeProjectile>(0);
         smoke.NextThinkTick = -1;
@@ -61,7 +57,7 @@ internal class NadeManager
 
     private void FreezeGrenadeExplode(CSmokeGrenadeProjectile smoke)
     {
-        Logger.LogDebug("Freezenade explode");
+        ChaseMod.Logger.LogDebug("Freezenade explode");
 
         if (!smoke.IsValid)
         {
@@ -74,8 +70,8 @@ internal class NadeManager
             return;
         }
 
-        var decoyCoord = smoke.AbsOrigin;
-        if (decoyCoord == null)
+        var smokeProjectileOrigin = smoke.AbsOrigin;
+        if (smokeProjectileOrigin == null)
         {
             return;
         }
@@ -87,38 +83,37 @@ internal class NadeManager
         }
 
         var players = ChaseModUtils.GetAllRealPlayers();
-        foreach (var other in players)
+        foreach (var player in players)
         {
-            var pawn = other.PlayerPawn.Value!;
+            var pawn = player.PlayerPawn.Value!;
             if (pawn.LifeState != (byte)LifeState_t.LIFE_ALIVE)
             {
                 continue;
             }
 
-            if (!_plugin.Config.StunSameTeam && other.TeamNum == thrower.Value.TeamNum)
+            if (!_plugin.Config.StunSameTeam && player.TeamNum == thrower.Value.TeamNum)
             {
                 continue;
             }
 
-            var pcCoord = pawn.AbsOrigin;
-            if (pcCoord == null)
+            var playerOrigin = pawn.AbsOrigin;
+            if (playerOrigin == null)
             {
-                Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
+                ChaseMod.Logger.LogWarning("Freezenade: other pawn has null AbsOrigin");
                 continue;
             }
 
-            var distance = pcCoord.Distance(decoyCoord);
-            Logger.LogDebug($"Distance between FreezeNade and {other.PlayerName} = {distance}");
+            var distance = playerOrigin.Distance(smokeProjectileOrigin);
+            ChaseMod.Logger.LogDebug($"Distance between FreezeNade and {player.PlayerName} = {distance}");
 
             if (distance > _plugin.Config.StunFreezeRadius)
             {
                 continue;
             }
 
-            _playerFreezeManager.Freeze(other, _plugin.Config.StunFreezeTime, true, true, false);
+            _playerFreezeManager.Freeze(player, _plugin.Config.StunFreezeTime, true, true, false);
         }
 
         smoke.Remove();
     }
-
 }

@@ -10,10 +10,10 @@ using CounterStrikeSharp.API.Core.Logging;
 
 namespace ChaseMod;
 
-[MinimumApiVersion(141)]
+[MinimumApiVersion(178)]
 public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
 {
-    private static new ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModCS#");
+    public new static ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModCS#");
 
     public override string ModuleName => "HnS ChaseMod";
     public override string ModuleAuthor => "svn";
@@ -134,10 +134,7 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
                         }
                     }
                 }
-
             }
         }
     }
-
 }
-

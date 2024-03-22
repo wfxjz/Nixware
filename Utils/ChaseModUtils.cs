@@ -9,18 +9,23 @@ using CounterStrikeSharp.API.Core.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace ChaseMod.Utils;
+
 public static class ChaseModUtils
 {
-
-    private static ILogger Logger = CoreLogging.Factory.CreateLogger("ChaseModUtils");
-
     public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    public static CCSGameRules? GetGameRules()
+    public static CCSGameRules GetGameRules()
     {
-        return Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
-            .First().GameRules;
-    } 
+        var gameRulesEntities = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules");
+        var gameRules = gameRulesEntities.First().GameRules;
+
+        if (gameRules == null)
+        {
+            throw new Exception("Game rules not found!");
+        }
+
+        return gameRules;
+    }
 
     public static bool IsRealPlayer(CCSPlayerController p)
     {
