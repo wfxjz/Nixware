@@ -47,7 +47,7 @@ internal class NadeManager
     {
         ChaseMod.Logger.LogDebug("Freezenade thrown");
 
-        var smoke = hook.GetReturn<CSmokeGrenadeProjectile>(0);
+        var smoke = hook.GetReturn<CSmokeGrenadeProjectile>();
         smoke.NextThinkTick = -1;
 
         _plugin.AddTimer(_plugin.Config.StunThrowTime, () => FreezeGrenadeExplode(smoke));
