@@ -21,6 +21,7 @@ internal class RoundStartFreezeTimeManager
     private int FrozenUntilTick => _roundStartTick + (int)(_plugin.Config.RoundStartFreezeTime / Server.TickInterval);
 
     private Timer? _countdownTimer;
+    private Timer? _soundTimer;
 
     public RoundStartFreezeTimeManager(ChaseMod chaseMod, PlayerFreezeManager playerFreezeManager)
     {
@@ -78,11 +79,25 @@ internal class RoundStartFreezeTimeManager
             SwitchFallDamage(true);
             _countdownTimer?.Kill();
             _countdownTimer = null;
+            _soundTimer?.Kill();
+            _soundTimer = null;
         }
 
         foreach (var player in ChaseModUtils.GetAllRealPlayers())
         {
             player.PrintToCenter(timeLeft > 0 ? $"Round begins in {timeLeft:0.0} seconds!" : "Round start!");
+        }
+
+        if (_soundTimer == null && timeLeft > 0)
+        {
+            _soundTimer = _plugin.AddTimer(1.0f, PlaySound, TimerFlags.REPEAT);
+        }
+    }
+
+    private void PlaySound(){
+        foreach (var player in ChaseModUtils.GetAllRealPlayers())
+        {
+            player.ExecuteClientCommand($"play sounds/player/playerping");
         }
     }
 
