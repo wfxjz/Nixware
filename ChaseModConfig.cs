@@ -17,6 +17,6 @@ public sealed class ChaseModConfig : BasePluginConfig
     [JsonPropertyName("absvelocityWorkaroundMultiplier")] public float absvelocityWorkaroundMultiplier { get; set; } = 1.0f;
     [JsonPropertyName("maxTerroristWinStreak")] public int MaxTerroristWinStreak { get; set; } = 5;
     [JsonPropertyName("alwaysDisableTerroristKnife")] public bool AlwaysDisableTerroristKnife { get; set; } = false;
-    [JsonPropertyName("enableCountDownSound")] public bool EnableCountDownSound { get; set; } = false;
-    [JsonPropertyName("countDownSoundPath")] public string CountDownSoundPath { get; set; } = "sounds/player/playerping";
+    [JsonPropertyName("enableFreezeTimeCountDownSound")] public bool EnableFreezeTimeCountDownSound { get; set; } = false;
+    [JsonPropertyName("freezeTimeCountDownSoundPath")] public string FreezeTimeCountDownSoundPath { get; set; } = "sounds/player/playerping";
 }

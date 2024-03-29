@@ -19,8 +19,8 @@ internal class RoundStartFreezeTimeManager
 
     private float FrozenUntilTime => _roundStartTime + _plugin.Config.RoundStartFreezeTime;
     private int FrozenUntilTick => _roundStartTick + (int)(_plugin.Config.RoundStartFreezeTime / Server.TickInterval);
-    private string CountDownSoundPath => _plugin.Config.CountDownSoundPath;
-    private bool EnableCountDownSound => _plugin.Config.EnableCountDownSound;
+    private string CountDownSoundPath => _plugin.Config.FreezeTimeCountDownSoundPath;
+    private bool EnableCountDownSound => _plugin.Config.EnableFreezeTimeCountDownSound;
 
     private Timer? _countdownTimer;
     private Timer? _soundTimer;
@@ -75,7 +75,7 @@ internal class RoundStartFreezeTimeManager
 
             if (EnableCountDownSound == true)
             {
-                _soundTimer = _plugin.AddTimer(1.0f, PlaySound, TimerFlags.REPEAT);
+                _soundTimer = _plugin.AddTimer(1.0f, PlaySoundTimer, TimerFlags.REPEAT);
             }
 
             _countdownTimer = _plugin.AddTimer(0.1f, CountdownTimerTick, TimerFlags.REPEAT);
@@ -101,7 +101,7 @@ internal class RoundStartFreezeTimeManager
 
     }
 
-    private void PlaySound()
+    private void PlaySoundTimer()
     {
         var timeLeft = FrozenUntilTime - Server.CurrentTime;
         if (timeLeft <= 0)
