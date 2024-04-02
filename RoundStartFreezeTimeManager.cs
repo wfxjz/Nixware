@@ -14,7 +14,6 @@ internal class RoundStartFreezeTimeManager
     private readonly ChaseMod _plugin;
     private readonly PlayerFreezeManager _playerFreezeManager;
     private float _roundStartTime;
-    private int _roundStartTick;
     private float? _normalFalldamageScale;
 
     private float FrozenUntilTime => _roundStartTime + _plugin.Config.RoundStartFreezeTime;
@@ -41,7 +40,6 @@ internal class RoundStartFreezeTimeManager
             }
 
             _roundStartTime = Server.CurrentTime;
-            _roundStartTick = Server.TickCount;
 
             if (_plugin.Config.RoundStartFreezeTime <= 0)
             {
