@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using ChaseMod.Utils;
 
 using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
+using Microsoft.Extensions.Logging;
 
 namespace ChaseMod;
 
@@ -27,8 +28,10 @@ internal class PlayerFreezeManager
 
     public void Freeze(CCSPlayerController controller, float time, bool showEffect, bool sendMessage, bool resetVelocity)
     {
-        if (!controller.IsValid || !controller.PlayerPawn.IsValid) return;
+        if (!ChaseModUtils.IsRealPlayer(controller)) return;
         var pawn = controller.PlayerPawn.Value!;
+
+        ChaseMod.Logger.LogInformation($"Freeze player {pawn.Index}");
 
         var origVelocity = pawn.AbsVelocity.ToManaged();
         pawn.AbsVelocity.Set(0, 0, 0);
@@ -74,8 +77,10 @@ internal class PlayerFreezeManager
 
     public void Unfreeze(CCSPlayerController controller, bool sendMessage)
     {
-        if (!controller.IsValid || !controller.PlayerPawn.IsValid) return;
+        if (!ChaseModUtils.IsRealPlayer(controller)) return;
         var pawn = controller.PlayerPawn.Value!;
+
+        ChaseMod.Logger.LogInformation($"Unfreeze player {pawn.Index}");
 
         pawn.UnfreezePlayer();
 

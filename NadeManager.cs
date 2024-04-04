@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using ChaseMod.Utils.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using ChaseMod.Utils;
+using CounterStrikeSharp.API;
 
 namespace ChaseMod;
 internal class NadeManager
@@ -49,8 +50,15 @@ internal class NadeManager
 
         var smoke = hook.GetReturn<CSmokeGrenadeProjectile>();
         smoke.NextThinkTick = -1;
+        Utilities.SetStateChanged(smoke, "CBaseEntity", "m_nNextThinkTick");
 
-        _plugin.AddTimer(_plugin.Config.StunThrowTime, () => FreezeGrenadeExplode(smoke));
+        _plugin.AddTimer(_plugin.Config.StunThrowTime, () =>
+        {
+            Server.NextFrame(() =>
+            {
+                FreezeGrenadeExplode(smoke);
+            });
+        });
 
         return HookResult.Continue;
     }
@@ -116,4 +124,5 @@ internal class NadeManager
 
         smoke.Remove();
     }
+
 }

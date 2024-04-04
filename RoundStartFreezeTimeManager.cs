@@ -50,12 +50,12 @@ internal class RoundStartFreezeTimeManager
 
             foreach (var player in ChaseModUtils.GetAllRealPlayers())
             {
-                if (!player.PlayerPawn.IsValid) continue;
                 var pawn = player.PlayerPawn.Value!;
 
                 if (player.Team == CsTeam.CounterTerrorist)
                 {
-                    _playerFreezeManager.Freeze(player, _plugin.Config.RoundStartFreezeTime, true, false, true);
+                    _playerFreezeManager.Freeze(player, _plugin.Config.RoundStartFreezeTime, 
+                                                true, false, true);
                 }
             }
 
@@ -71,12 +71,14 @@ internal class RoundStartFreezeTimeManager
                 _soundTimer = null;
             }
 
-            if (EnableCountDownSound == true)
+            if (EnableCountDownSound)
             {
-                _soundTimer = _plugin.AddTimer(1.0f, PlaySoundTimer, TimerFlags.REPEAT);
+                _soundTimer = _plugin.AddTimer(1.0f, PlaySoundTimer, 
+                                               TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);
             }
 
-            _countdownTimer = _plugin.AddTimer(0.1f, CountdownTimerTick, TimerFlags.REPEAT);
+            _countdownTimer = _plugin.AddTimer(0.1f, CountdownTimerTick, 
+                                               TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);
 
             return HookResult.Continue;
         });
@@ -96,7 +98,6 @@ internal class RoundStartFreezeTimeManager
         {
             player.PrintToCenter(text);
         }
-
     }
 
     private void PlaySoundTimer()
