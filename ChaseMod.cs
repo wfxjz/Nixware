@@ -36,11 +36,6 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
         _knifeCooldownManager = new KnifeCooldownManager(this);
         _teamSwitchManager = new TeamSwitchManager(this);
 
-        RegisterEventHandler<EventPlayerJump>((player, info) =>
-        {
-            return HookResult.Continue;
-        });
-
         MiscCommands.AddCommands(this);
 
         _nadeManager.EnableHooks();
