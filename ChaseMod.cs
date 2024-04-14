@@ -59,14 +59,11 @@ public class ChaseMod : BasePlugin, IPluginConfig<ChaseModConfig>
     [GameEventHandler]
     public HookResult OnEventRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
     {
-        Server.NextFrame(() =>
-        {
-            TriggerWorkaround.DisableWorkaroundTriggers();
-        });
+        Server.NextFrame(TriggerWorkaround.DisableWorkaroundTriggers);
         return HookResult.Continue;
     }
 
-    public void OnTick()
+    private void OnTick()
     {
         foreach (var controller in ChaseModUtils.GetAllRealPlayers())
         {
